@@ -1,0 +1,6 @@
+.DS_Store
+notebooks/
+**/__pycache__/
+.python-version
+src/keys/
+src/data/

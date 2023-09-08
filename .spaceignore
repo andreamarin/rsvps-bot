@@ -1,0 +1,4 @@
+notebooks/**
+src/data/**
+src/.python-version
+src/__pycache__/**
