@@ -185,13 +185,19 @@ def save_rsvps(rsvps: list, old_rsvps: list, db):
 
         # keep only the ones that are not already in the DB
         rsvps_df = rsvps_df.loc[~rsvps_df.key.isin(old_keys)].fillna("")
-        new_rsvps = rsvps_df.to_dict(orient="records")
     else:
-        new_rsvps = rsvps
+        rsvps_df = pd.DataFrame(rsvps)
+
+    # save unique answers
+    rsvps_df = rsvps_df.drop_duplicates(subset=["key"])
+    rsvps_df = rsvps_df.fillna("")
+    new_rsvps = rsvps_df.to_dict(orient="records")
 
     LOGGER.info(f"Saving {len(new_rsvps)} new answers")
 
-    batch_size = 25
+    # rsvps_df.to_csv("./data/db_rsvps.csv")
+
+    batch_size = 20
     for start in range(0, len(new_rsvps), batch_size):
         LOGGER.info(f"Saving rsvps {start} to {start + batch_size}")
 
@@ -244,6 +250,12 @@ def write_rsvps(rsvps: pd.DataFrame, sheet_name: str, sheets):
     # build values list
     values = [rsvps.columns.tolist()]
     values.extend(rsvps.to_numpy().tolist())
+
+    # delete current cell content first
+    result = sheets.spreadsheets().values().clear(
+        spreadsheetId=SPREADSHEET_ID,
+        range=f"{sheet_name}!A:Z"
+    ).execute()
 
     body = {"values": values}
 
@@ -301,9 +313,9 @@ def read_mails():
 
         # save in df 
         rsvps_df = pd.DataFrame(rsvps)
+        rsvps_df = rsvps_df.drop_duplicates(subset=["key"])
 
-        # drop duplicates (counting all the columns)
-        rsvps_df = rsvps_df.drop_duplicates()
+        LOGGER.info(f"{rsvps_df.shape[0]} unique mails")
 
         # save the last ingested date
         max_date = rsvps_df.fecha.max()
@@ -322,10 +334,9 @@ def read_mails():
         write_rsvps(rsvps_df, "confirmaciones_raw", sheets)
 
         # drop duplicates (keep the last answer)
-        rsvps_df.drop_duplicates(
+        rsvps_df = rsvps_df.drop_duplicates(
             subset=["nombre", "teléfono"],
-            keep="last",
-            inplace=True
+            keep="last"
         )
 
         LOGGER.info(f"{rsvps_df.shape[0]} mails after dropping duplicates")

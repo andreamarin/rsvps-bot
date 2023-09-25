@@ -29,3 +29,7 @@ def get_auth_token():
         # Save the credentials for the next run
         with open(f'{KEYS_PATH}/token.json', 'w') as token:
             token.write(creds.to_json())
+
+
+if __name__ == "__main__":
+    get_auth_token()
