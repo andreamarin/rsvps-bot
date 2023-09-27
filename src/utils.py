@@ -1,5 +1,4 @@
 import logging
-from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
@@ -16,12 +15,6 @@ logging.basicConfig(
 def build_service(service_name: str):
 
     creds = Credentials.from_authorized_user_file(f'{KEYS_PATH}/token.json', SCOPES)
-    if creds.expired and creds.refresh_token:
-        creds.refresh(Request())
-        LOGGER.info("refreshing token")
-        # save new token
-        with open(f'{KEYS_PATH}/token.json', 'w') as token:
-            token.write(creds.to_json())
 
     if service_name == "gmail":
         # create gmail client

@@ -1,4 +1,5 @@
 notebooks/**
-src/data/**
-src/.python-version
-src/__pycache__/**
+**/data/**
+**/.python-version
+**/__pycache__/**
+gmail_auth.py
